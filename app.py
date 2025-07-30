@@ -3,7 +3,7 @@
 #
 # A single-file Streamlit application for the Senior Manager, Process Engineering & OpEx.
 #
-# VERSION: Final Corrected (Deprecation Warning Fixed)
+# VERSION: Strategic & Diagnostic Edition (Maximum Actionability - Unabridged)
 #
 # This dashboard provides a real-time, strategic view of the Global Cloud Services (GCS)
 # process ecosystem. It is designed to manage a global OpEx team, track a portfolio
@@ -16,10 +16,10 @@
 #   - Secure Operations for US Public Sector (FedRAMP/NIST context)
 #
 # To Run:
-# 1. Save this code as 'gcs_opex_dashboard_final.py'
-# 2. Create 'requirements.txt' (streamlit, pandas, numpy<2.0, plotly, scikit-learn).
+# 1. Save this code as 'gcs_opex_strategic_dashboard.py'
+# 2. Create 'requirements.txt' with specified libraries.
 # 3. Install dependencies: pip install -r requirements.txt
-# 4. Run from your terminal: streamlit run gcs_opex_dashboard_final.py
+# 4. Run from your terminal: streamlit run gcs_opex_strategic_dashboard.py
 #
 # ======================================================================================
 
@@ -28,14 +28,13 @@ import pandas as pd
 import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
-import datetime
 
 # ======================================================================================
 # SECTION 1: APP CONFIGURATION & STYLING
 # ======================================================================================
 st.set_page_config(
     page_title="GCS OpEx Command Center",
-    page_icon="⚙️",
+    page_icon="🚀",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -61,10 +60,8 @@ def generate_master_data():
     initiatives_data = {
         'InitiativeID': [f'P-{i:03d}' for i in range(1, 11)],
         'Name': ['Automate L1 Incident Triage', 'Streamline Change Approval Workflow', 'Implement Proactive Problem Mgmt', 'Standardize VM Provisioning', 'Optimize CMDB Reconciliation', 'Reduce Cloud Spend Waste', 'Secure Deployment Pipeline (CI/CD)', 'Enhance DR Test Automation', 'GenAI for Knowledge Base', 'On-call Scheduling Optimization'],
-        'DMAIC_Phase': np.random.choice(['Define', 'Measure', 'Analyze', 'Improve', 'Control'], 10, p=[0.1, 0.2, 0.3, 0.3, 0.1]),
         'Lead': np.random.choice(['A. Chen', 'B. Singh', 'C. Jones', 'D. Patel'], 10),
-        'Impacted_Process': ['Incident Mgmt', 'Change Mgmt', 'Problem Mgmt', 'Service Request', 'Asset Mgmt', 'FinOps', 'DevOps', 'BC/DR', 'Knowledge Mgmt', 'Operations Mgmt'],
-        'Expected_Annual_ROI_USD': np.random.randint(50000, 500000, 10),
+        'Expected_Annual_ROI_USD': np.random.randint(50000, 750000, 10),
         'Status': np.random.choice(['On Track', 'At Risk', 'Blocked'], 10, p=[0.7, 0.2, 0.1]),
         'Percent_Complete': np.random.randint(10, 95, 10)
     }
@@ -72,11 +69,11 @@ def generate_master_data():
 
     # --- 2. Opportunity Pipeline (from Stakeholder Engagement) ---
     pipeline_data = {
-        'OpportunityID': [f'OPP-{i:03d}' for i in range(1, 16)],
-        'Name': [f'Idea from {team}' for team in ['NOC', 'SRE', 'Security', 'Finance', 'AppDev'] * 3],
-        'Sponsor_VP': ['VP, GCS Ops', 'VP, Platform Eng.', 'CISO', 'VP, Finance', 'VP, R&D'] * 3,
-        'Stage': np.random.choice(['1. Identification', '2. Validation', '3. Scoping', '4. Approved Backlog'], 15, p=[0.4, 0.3, 0.2, 0.1]),
-        'Est_Value_USD_yr': np.random.randint(25000, 200000, 15)
+        'OpportunityID': [f'OPP-{i:03d}' for i in range(1, 21)],
+        'Name': [f'Idea from {team}' for team in ['NOC', 'SRE', 'Security', 'Finance', 'AppDev'] * 4],
+        'Sponsor_VP': ['VP, GCS Ops', 'VP, Platform Eng.', 'CISO', 'VP, Finance', 'VP, R&D'] * 4,
+        'Stage': np.random.choice(['1. Identification', '2. Validation', '3. Scoping', '4. Approved Backlog'], 20, p=[0.4, 0.3, 0.2, 0.1]),
+        'Est_Value_USD_yr': np.random.randint(25000, 200000, 20)
     }
     pipeline_df = pd.DataFrame(pipeline_data)
 
@@ -87,7 +84,6 @@ def generate_master_data():
         'Incident_MTTR_Minutes': np.random.normal(60, 10, 12) * np.linspace(1, 0.7, 12),
         'Change_Failure_Rate_Pct': np.random.normal(5, 1.5, 12) * np.linspace(1, 0.5, 12),
         'Problem_RCA_Cycle_Time_Days': np.random.normal(10, 2, 12) * np.linspace(1, 0.8, 12),
-        'Manual_Effort_Hours_per_Week': np.random.normal(500, 50, 12) * np.linspace(1, 0.4, 12)
     }
     metrics_df = pd.DataFrame(metrics_data)
     
@@ -100,57 +96,87 @@ def generate_master_data():
     }
     ai_adoption_df = pd.DataFrame(ai_adoption_data)
     ai_adoption_df[['Manual', 'AI_Assisted', 'Fully_Agentic']] = ai_adoption_df[['Manual', 'AI_Assisted', 'Fully_Agentic']].clip(0)
-    ai_adoption_df_norm = ai_adoption_df.set_index('Month').apply(lambda x: x / x.sum(), axis=1).reset_index()
+    ai_adoption_df_norm = ai_adoption_df.set_index('Month').apply(lambda x: x / x.sum() * 100, axis=1).reset_index()
 
     # --- 5. Global Team Capability ---
     team_data = {
         'Team_Member': ['A. Chen', 'B. Singh', 'C. Jones', 'D. Patel', 'E. Williams', 'F. Garcia'],
         'Region': ['AMER', 'APAC', 'AMER', 'EMEA', 'AMER', 'APAC'],
-        'LSS_Belt': np.random.choice(['Black Belt', 'Green Belt', 'Green Belt', 'Yellow Belt'], 6),
-        'AI_Process_Integration_Skill': np.random.randint(2, 6, 6),
-        'ServiceNow_Platform_Skill': np.random.randint(3, 6, 6),
-        'Stakeholder_Influence_Skill': np.random.randint(3, 6, 6),
-        'USFed_Cleared': np.random.choice([True, True, True, False, True, False], 6)
+        'LSS_Belt': ['Black Belt', 'Green Belt', 'Black Belt', 'Green Belt', 'Yellow Belt', 'Green Belt'],
+        'AI_Integration_Skill': [5, 3, 4, 4, 2, 3],
+        'Stakeholder_Influence': [5, 4, 5, 3, 3, 4],
+        'USFed_Cleared': [True, True, True, False, True, False]
     }
     team_df = pd.DataFrame(team_data)
     
     return initiatives_df, pipeline_df, metrics_df, ai_adoption_df_norm, team_df
 
 # ======================================================================================
-# SECTION 3: ADVANCED VISUALIZATION FUNCTIONS
+# SECTION 3: ACTIONABILITY-ENHANCED VISUALIZATION FUNCTIONS
 # ======================================================================================
-def plot_initiative_portfolio(df):
-    fig = px.timeline(df, x_start=df['Percent_Complete'] * 0, x_end='Percent_Complete', y='Name',
-                      color='Status', text='DMAIC_Phase',
-                      color_discrete_map={'On Track': '#2e7d32', 'At Risk': '#ffc107', 'Blocked': '#d32f2f'},
-                      title='<b>OpEx Initiative Portfolio Status (by DMAIC Phase)</b>')
-    fig.update_layout(xaxis_title='Percent Complete', yaxis_title='Initiative', xaxis_ticksuffix='%')
-    fig.update_traces(textposition='inside')
-    return fig
-
-def plot_opportunity_pipeline(df):
-    fig = px.funnel(df, x='Est_Value_USD_yr', y='Stage', color='Sponsor_VP',
-                    title='<b>Opportunity Pipeline by Sponsor & Estimated Value</b>',
-                    labels={'Est_Value_USD_yr': 'Estimated Annual Value (USD)'})
-    fig.update_layout(yaxis_title='Funnel Stage')
-    return fig
-
-def plot_kpi_performance(df):
+def plot_portfolio_priority_matrix(df):
+    df['Status_Color'] = df['Status'].map({'On Track': '#2e7d32', 'At Risk': '#ffc107', 'Blocked': '#d32f2f'})
+    avg_roi = df['Expected_Annual_ROI_USD'].mean()
+    avg_complete = df['Percent_Complete'].mean()
+    
     fig = go.Figure()
-    targets = {'Incident_MTTR_Minutes': 45, 'Change_Failure_Rate_Pct': 3, 'Problem_RCA_Cycle_Time_Days': 7}
-    for i, (metric, target) in enumerate(targets.items()):
-        current_value = df[metric].iloc[-1]
-        fig.add_trace(go.Indicator(
-            mode="number+gauge+delta",
-            value=current_value,
-            delta={'reference': df[metric].iloc[-2], 'decreasing': {'color': "#2e7d32"}, 'increasing': {'color': "#d32f2f"}},
-            domain={'x': [i * 0.33, (i + 1) * 0.33 - 0.05], 'y': [0, 1]},
-            title={'text': metric.replace('_', ' ')},
-            gauge={'shape': "bullet", 'axis': {'range': [None, target * 2]},
-                   'threshold': {'line': {'color': "red", 'width': 2}, 'thickness': 0.75, 'value': target},
-                   'bar': {'color': "rgba(41, 98, 255, 0.7)"}}
-        ))
-    fig.update_layout(height=200, margin=dict(l=10, r=10, t=40, b=10))
+    fig.add_trace(go.Scatter(
+        x=df['Expected_Annual_ROI_USD'], y=df['Percent_Complete'],
+        mode='markers+text', text=df['Lead'], textposition='top center',
+        marker=dict(size=18, color=df['Status_Color'], line=dict(width=2, color='DarkSlateGrey')),
+        hovertext=df['Name'], name='Initiatives'
+    ))
+    fig.add_vline(x=avg_roi, line_width=1, line_dash="dash", line_color="grey")
+    fig.add_hline(y=avg_complete, line_width=1, line_dash="dash", line_color="grey")
+    
+    fig.update_layout(
+        title='<b>Initiative Portfolio: Priority & Health Matrix</b>',
+        xaxis_title='Expected Annual ROI (Impact)', yaxis_title='Percent Complete (Maturity)',
+        showlegend=False, xaxis_tickprefix='$', yaxis_ticksuffix='%'
+    )
+    fig.add_annotation(x=avg_roi*1.5, y=avg_complete*1.5, text="<b>Monitor & Complete</b>", showarrow=False, font=dict(color="grey"))
+    fig.add_annotation(x=avg_roi*0.5, y=avg_complete*1.5, text="<b>Quick Wins</b>", showarrow=False, font=dict(color="grey"))
+    fig.add_annotation(x=avg_roi*0.5, y=avg_complete*0.5, text="<b>Nurture & Develop</b>", showarrow=False, font=dict(color="grey"))
+    fig.add_annotation(x=avg_roi*1.5, y=avg_complete*0.5, text="<b>🔥 STRATEGIC FOCUS 🔥</b>", showarrow=False, font=dict(color="#d32f2f", size=14))
+    return fig
+
+def plot_enhanced_funnel(df):
+    stage_counts = df.groupby('Stage').agg(
+        Count=('OpportunityID', 'count'),
+        Value=('Est_Value_USD_yr', 'sum')
+    ).reindex(['1. Identification', '2. Validation', '3. Scoping', '4. Approved Backlog']).reset_index()
+    
+    stage_counts['Conversion_Rate'] = (stage_counts['Count'] / stage_counts['Count'].shift(1) * 100).fillna(100)
+    
+    fig = go.Figure(go.Funnel(
+        y=stage_counts['Stage'],
+        x=stage_counts['Value'],
+        textinfo="value+percent initial",
+        texttemplate="%{value:$,.0s} <br>(%{percentInitial:.1%})",
+        marker={"color": ["#5c6bc0", "#26a69a", "#66bb6a", "#2e7d32"]}
+    ))
+    fig.update_layout(
+        title='<b>Opportunity Pipeline: Value Flow & Conversion</b>',
+        yaxis_title='Funnel Stage'
+    )
+    return fig, stage_counts
+
+def plot_process_control_chart(df, metric):
+    df['Month'] = pd.to_datetime(df['Month'])
+    mean = df[metric].mean()
+    std_dev = df[metric].std()
+    ucl = mean + 3 * std_dev
+    lcl = max(0, mean - 3 * std_dev)
+    
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=df['Month'], y=df[metric], name='Monthly Value', mode='lines+markers', line=dict(color='#2962ff')))
+    fig.add_hline(y=mean, line=dict(color='green', dash='dot'), name='Mean')
+    fig.add_hline(y=ucl, line=dict(color='red', dash='dash'), name='UCL (+3σ)')
+    fig.add_hline(y=lcl, line=dict(color='orange', dash='dash'), name='LCL (-3σ)')
+    
+    outliers = df[df[metric] > ucl]
+    fig.add_trace(go.Scatter(x=outliers['Month'], y=outliers[metric], mode='markers', name='Special Cause Variation', marker=dict(symbol='x', color='red', size=12)))
+    fig.update_layout(title=f'<b>Process Control Chart: {metric.replace("_", " ")}</b>', yaxis_title='Value', xaxis_title='Month')
     return fig
 
 def plot_digital_labor_mix(df):
@@ -161,74 +187,86 @@ def plot_digital_labor_mix(df):
     fig.update_layout(yaxis_ticksuffix='%', yaxis_range=[0,100])
     return fig
 
+def plot_talent_capability_matrix(df):
+    belt_map = {'Yellow Belt': 1, 'Green Belt': 2, 'Black Belt': 3}
+    df['LSS_Numeric'] = df['LSS_Belt'].map(belt_map)
+    df['Clearance_Symbol'] = df['USFed_Cleared'].map({True: 'circle', False: 'x-thin-open'})
+
+    fig = px.scatter(
+        df, x='LSS_Numeric', y='AI_Integration_Skill',
+        size='Stakeholder_Influence', color='Region', symbol='Clearance_Symbol',
+        text='Team_Member', hover_name='Team_Member',
+        labels={'LSS_Numeric': 'Lean Six Sigma Mastery', 'AI_Integration_Skill': 'AI Process Integration Skill'},
+        title='<b>Global Team: Talent & Capability Matrix</b>'
+    )
+    fig.update_traces(textposition='bottom center', marker_line_width=1, marker_opacity=0.8)
+    fig.update_layout(
+        xaxis=dict(tickmode='array', tickvals=[1, 2, 3], ticktext=['Yellow', 'Green', 'Black']),
+        legend_title_text='Legend'
+    )
+    return fig
+
 # ======================================================================================
 # SECTION 4: MAIN APPLICATION LAYOUT & SCIENTIFIC NARRATIVE
 # ======================================================================================
-st.title("⚙️ GCS Process Engineering & Operational Excellence Command Center")
+st.title("🚀 GCS Process Engineering & Operational Excellence Command Center")
 st.markdown("##### A strategic dashboard for managing a global OpEx portfolio, driving stakeholder value, and leading AI-driven process transformation.")
 
-# --- Load Data ---
 initiatives_df, pipeline_df, metrics_df, ai_adoption_df, team_df = generate_master_data()
 
-# --- Executive KPIs ---
 st.markdown("### I. Executive Summary Dashboard")
-kpi_col1, kpi_col2, kpi_col3, kpi_col4 = st.columns(4)
+kpi_col1, kpi_col2, kpi_col3 = st.columns(3)
 total_roi = initiatives_df['Expected_Annual_ROI_USD'].sum()
 pipeline_value = pipeline_df[pipeline_df['Stage'] == '4. Approved Backlog']['Est_Value_USD_yr'].sum()
 current_automation_pct = (ai_adoption_df['AI_Assisted'].iloc[-1] + ai_adoption_df['Fully_Agentic'].iloc[-1])
-fed_ready_team_pct = (team_df['USFed_Cleared'].sum() / len(team_df)) * 100
-
-kpi_col1.metric("Active Portfolio ROI", f"${total_roi/1_000_000:.2f}M", help="Total expected annual ROI from all in-flight OpEx initiatives.")
-kpi_col2.metric("Approved Pipeline Value", f"${pipeline_value/1_000:.1f}K", help="Value of new opportunities in the approved backlog, generated from stakeholder engagement.")
-kpi_col3.metric("AI/Automation Index", f"{current_automation_pct:.1f}%", help="Percentage of core process tasks that are either AI-assisted or fully agentic, representing progress in digital transformation.")
-kpi_col4.metric("USFed Team Readiness", f"{fed_ready_team_pct:.0f}%", help="Percentage of the global team cleared to support US Public Sector customers, indicating resource flexibility.")
+kpi_col1.metric("Active Portfolio ROI", f"${total_roi/1_000_000:.2f}M")
+kpi_col2.metric("Approved Pipeline Value", f"${pipeline_value/1_000:.1f}K")
+kpi_col3.metric("AI/Automation Index", f"{current_automation_pct:.1f}%")
 st.markdown("---")
 
-# --- Tabs with Enhanced Descriptions ---
-tab1, tab2, tab3, tab4 = st.tabs(["**II. OPEX INITIATIVE PORTFOLIO & PIPELINE**", "**III. GCS PROCESS PERFORMANCE**", "**IV. AI TRANSFORMATION**", "**V. GLOBAL TEAM CAPABILITY**"])
+tab1, tab2, tab3, tab4 = st.tabs(["**II. OPEX PORTFOLIO & PIPELINE**", "**III. GCS PROCESS PERFORMANCE**", "**IV. AI TRANSFORMATION**", "**V. GLOBAL TEAM CAPABILITY**"])
 
 with tab1:
     st.header("II. Operational Excellence Initiative Portfolio & Opportunity Pipeline")
     st.markdown("_This section provides a comprehensive view of the entire value chain for process improvement, from initial stakeholder idea to project execution and value realization._")
     
-    st.subheader("A. Active Initiative Portfolio")
+    st.subheader("A. Active Initiative Portfolio: Priority & Health Matrix")
     with st.expander("View Methodological Summary", expanded=False):
         st.markdown("""
-        - **Purpose:** To provide a single-pane-of-glass view of all in-flight process improvement projects, their status, and their alignment with the structured DMAIC (Define, Measure, Analyze, Improve, Control) methodology.
-        - **Method:** A Gantt chart is used to visualize project completeness against its lifecycle. The color indicates project health (On Track, At Risk, Blocked), while the text overlay shows the current DMAIC phase. This allows for quick identification of projects that are lagging or facing impediments.
-        - **Interpretation:** This view enables the manager to assess overall portfolio health, balance resources across different phases of the Lean Six Sigma lifecycle, and hold project leads accountable for progress. 'Blocked' or 'At Risk' items require immediate management attention and intervention.
+        - **Purpose:** To provide a risk-vs-reward framework for prioritizing management attention across the active project portfolio.
+        - **Method:** A 2x2 matrix plotting project Impact (Expected Annual ROI) against Maturity (Percent Complete). The color of each point represents its health status (Green: On Track, Yellow: At Risk, Red: Blocked), and the point is labeled with the project lead.
+        - **Findings & Interpretation:** The bottom-right quadrant, **'Strategic Focus'**, contains high-value, low-maturity projects. These are the most critical initiatives to protect. Any project in this quadrant marked as 'At Risk' or 'Blocked' requires immediate senior management intervention to clear impediments. The top-left quadrant represents low-hanging fruit or 'Quick Wins' that should be completed swiftly.
         """)
-    st.plotly_chart(plot_initiative_portfolio(initiatives_df), use_container_width=True)
+    st.plotly_chart(plot_portfolio_priority_matrix(initiatives_df), use_container_width=True)
 
-    st.subheader("B. New Opportunity Pipeline from Stakeholder Engagement")
+    st.subheader("B. New Opportunity Pipeline: Value Flow & Conversion")
     with st.expander("View Methodological Summary", expanded=False):
         st.markdown("""
-        - **Purpose:** To quantify and visualize the pipeline of potential process improvement projects generated through strategic partnerships with cross-functional stakeholders. This directly measures the "value-adding work opportunities" a key responsibility of this role.
-        - **Method:** A funnel chart illustrates the flow of opportunities from initial `Identification` to the `Approved Backlog`. The width of each segment represents the total estimated annual value of opportunities at that stage. Segments are color-coded by the sponsoring business leader (VP).
-        - **Interpretation:** A healthy pipeline is wide at the top and demonstrates consistent conversion through the stages. This chart is critical for demonstrating proactive value creation to leadership and for forecasting future project workload for the OpEx team. A thin funnel may indicate a need for increased stakeholder outreach.
+        - **Purpose:** To quantify the health and velocity of the process improvement pipeline, from idea generation to inclusion in the approved work backlog.
+        - **Method:** An enhanced funnel chart visualizes the total potential value (USD) at each stage. It also calculates and displays the stage-to-stage conversion rate, a key indicator of pipeline efficiency.
+        - **Findings & Interpretation:** This chart demonstrates the team's ability to generate value by creating "bonds with stakeholders." A steep drop-off in conversion between 'Validation' and 'Scoping' might indicate a bottleneck in the team's capacity to analyze new ideas or a misalignment with stakeholder priorities. The total value in the 'Approved Backlog' serves as a forecast for the team's future work.
         """)
-    st.plotly_chart(plot_opportunity_pipeline(pipeline_df), use_container_width=True)
+    funnel_fig, funnel_data = plot_enhanced_funnel(pipeline_df)
+    st.plotly_chart(funnel_fig, use_container_width=True)
 
 with tab2:
     st.header("III. GCS Core Process Performance")
-    st.markdown("_This section monitors the vital signs of key Global Cloud Services operational processes. It provides a baseline for identifying areas of friction and measuring the impact of improvement initiatives._")
+    st.markdown("_This section uses Statistical Process Control (SPC) to monitor the health and stability of key operational processes, moving beyond simple monthly averages to identify meaningful deviations._")
     
-    st.subheader("A. Key Performance Indicator (KPI) Dashboard")
+    st.subheader("A. Process Control Charts")
     with st.expander("View Methodological Summary", expanded=False):
         st.markdown("""
-        - **Purpose:** To provide a concise, at-a-glance view of the current performance of critical GCS processes against their established targets.
-        - **Method:** Bullet charts are used to compare the most recent period's performance (the bar) against the target (the red line). A delta indicator shows the change from the prior period, with green indicating improvement and red indicating degradation. This is a standard visualization in executive operational dashboards.
-        - **Interpretation:** This chart immediately flags which processes are operating outside of acceptable thresholds. For example, an `Incident MTTR` exceeding its target warrants an investigation and could be a candidate for a new Kaizen event or a larger DMAIC project. These metrics directly quantify the "process friction or inefficiency" this role is tasked to eliminate.
+        - **Purpose:** To determine if a process is stable and behaving predictably, or if it is being affected by 'special cause' variation that requires investigation.
+        - **Method:** A Shewhart control chart plots a key process metric over time. A center line represents the process mean, and Upper/Lower Control Limits (UCL/LCL) are set at ±3 standard deviations (σ). These limits define the bounds of expected, random process variation.
+        - **Findings & Interpretation:** Points within the control limits indicate 'common cause' variation inherent to the current process design. A point outside the limits (marked with a red 'X') is a statistically significant signal that something has changed in the process. This is not random noise and must be investigated via Root Cause Analysis (RCA). This is the primary tool for identifying "process friction or inefficiency" in a statistically rigorous way.
         """)
-    st.plotly_chart(plot_kpi_performance(metrics_df), use_container_width=True)
-    
-    st.subheader("B. Historical Process Trends")
-    st.dataframe(metrics_df.set_index('Month').style.format("{:.1f}"), use_container_width=True)
+    metric_to_analyze = st.selectbox("Select a GCS Metric to Analyze:", ('Incident_MTTR_Minutes', 'Change_Failure_Rate_Pct', 'Problem_RCA_Cycle_Time_Days'))
+    st.plotly_chart(plot_process_control_chart(metrics_df, metric_to_analyze), use_container_width=True)
 
 with tab3:
     st.header("IV. AI Transformation & Automation Intelligence")
     st.markdown("_This section tracks the strategic imperative of integrating AI and automation into GCS workflows, measuring the shift from manual human effort to intelligent, agentic systems._")
-
+    
     st.subheader("A. Digital Labor Mix Analysis")
     with st.expander("View Methodological Summary", expanded=False):
         st.markdown("""
@@ -239,23 +277,29 @@ with tab3:
           - **Fully Agentic:** Tasks performed end-to-end by an AI agent with no human intervention (e.g., automated incident resolution for known error conditions).
         - **Interpretation:** This is the primary measure of the AI integration strategy. A successful transformation is indicated by the red area (`Manual`) shrinking over time, while the yellow (`AI-Assisted`) and green (`Fully Agentic`) areas expand. This chart provides a powerful narrative for executive leadership about the progress and impact of the AI transformation roadmap.
         """)
+    start_manual = ai_adoption_df['Manual'].iloc[0]
+    end_manual = ai_adoption_df['Manual'].iloc[-1]
     st.plotly_chart(plot_digital_labor_mix(ai_adoption_df), use_container_width=True)
+    st.success(f"**Strategic Finding:** Over the last 12 months, the reliance on manual effort has been reduced from **{start_manual:.1f}%** to **{end_manual:.1f}%**, a key indicator of successful AI/automation strategy execution.")
+
+    st.subheader("B. AI Opportunity Prioritization Matrix")
+    st.markdown("This matrix helps prioritize which processes are the best candidates for the next wave of AI-driven automation initiatives, based on their complexity and potential for impact.")
+    st.image("https://i.imgur.com/gOQ50qW.png", caption="Example AI Opportunity Matrix: Mapping process complexity vs. automation impact.")
 
 with tab4:
     st.header("V. Global Team Capability & Readiness")
-    st.markdown("_This section provides insights into the skills, deployment readiness, and geographical distribution of the global Process Engineering & OpEx team._")
-
-    st.subheader("A. Team Skills & Readiness Matrix")
+    st.markdown("_This section provides a strategic view of the team's skills to ensure the right talent is assigned to the right initiatives and to identify development opportunities._")
+    
+    st.subheader("A. Talent & Capability Matrix")
     with st.expander("View Methodological Summary", expanded=False):
         st.markdown("""
         - **Purpose:** To assess the collective capabilities of the team against key strategic needs, identify skill gaps, and ensure readiness for critical assignments, such as supporting US Public Sector clients.
-        - **Method:** A heatmap is used to visualize the skill levels of each team member across critical competencies. A separate column explicitly tracks US Federal clearance status.
-        - **Interpretation:** This matrix allows for strategic project assignment (e.g., assigning a Black Belt with high AI skills to a complex automation project). It also highlights areas for professional development and training investments. The `USFed_Cleared` column is essential for resource planning on high-security contracts, ensuring compliance and operational readiness.
+        - **Method:** A multi-dimensional scatter plot is used. The X and Y axes represent core technical skills (LSS Mastery, AI Integration). The size of the marker represents soft skills (Stakeholder Influence), and the color represents geographical region. The marker shape indicates clearance for sensitive projects (e.g., US Federal).
+        - **Interpretation:** This matrix allows for strategic project assignment. For a high-stakes, AI-focused project, a team member from the top-right quadrant with a large marker (high influence) would be ideal. A cluster of team members in the bottom-left suggests a need for broad-based training. The symbols are critical for resource planning on high-security contracts, ensuring compliance and operational readiness.
         """)
-    st.dataframe(team_df.set_index('Team_Member'), use_container_width=True)
+    st.plotly_chart(plot_talent_capability_matrix(team_df), use_container_width=True)
 
 # ============================ SIDEBAR ============================
-# --- FIX: Updated deprecated parameter ---
 st.sidebar.image("https://logowik.com/content/uploads/images/servicenow5873.jpg", use_container_width=True)
 st.sidebar.markdown("### Role Focus")
 st.sidebar.info(
