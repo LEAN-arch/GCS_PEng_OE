@@ -3,7 +3,7 @@
 #
 # A single-file Streamlit application for the Senior Manager, Process Engineering & OpEx.
 #
-# VERSION: Strategic Cloud Ops & AI Transformation
+# VERSION: Final Corrected (Deprecation Warning Fixed)
 #
 # This dashboard provides a real-time, strategic view of the Global Cloud Services (GCS)
 # process ecosystem. It is designed to manage a global OpEx team, track a portfolio
@@ -16,10 +16,10 @@
 #   - Secure Operations for US Public Sector (FedRAMP/NIST context)
 #
 # To Run:
-# 1. Save this code as 'gcs_opex_dashboard.py'
+# 1. Save this code as 'gcs_opex_dashboard_final.py'
 # 2. Create 'requirements.txt' (streamlit, pandas, numpy<2.0, plotly, scikit-learn).
 # 3. Install dependencies: pip install -r requirements.txt
-# 4. Run from your terminal: streamlit run gcs_opex_dashboard.py
+# 4. Run from your terminal: streamlit run gcs_opex_dashboard_final.py
 #
 # ======================================================================================
 
@@ -84,10 +84,10 @@ def generate_master_data():
     dates = pd.to_datetime(pd.date_range(start='2023-01-01', periods=12, freq='ME'))
     metrics_data = {
         'Month': dates,
-        'Incident_MTTR_Minutes': np.random.normal(60, 10, 12) * np.linspace(1, 0.7, 12), # Improving
-        'Change_Failure_Rate_Pct': np.random.normal(5, 1.5, 12) * np.linspace(1, 0.5, 12), # Improving
-        'Problem_RCA_Cycle_Time_Days': np.random.normal(10, 2, 12) * np.linspace(1, 0.8, 12), # Improving
-        'Manual_Effort_Hours_per_Week': np.random.normal(500, 50, 12) * np.linspace(1, 0.4, 12) # Improving via AI/Automation
+        'Incident_MTTR_Minutes': np.random.normal(60, 10, 12) * np.linspace(1, 0.7, 12),
+        'Change_Failure_Rate_Pct': np.random.normal(5, 1.5, 12) * np.linspace(1, 0.5, 12),
+        'Problem_RCA_Cycle_Time_Days': np.random.normal(10, 2, 12) * np.linspace(1, 0.8, 12),
+        'Manual_Effort_Hours_per_Week': np.random.normal(500, 50, 12) * np.linspace(1, 0.4, 12)
     }
     metrics_df = pd.DataFrame(metrics_data)
     
@@ -255,7 +255,8 @@ with tab4:
     st.dataframe(team_df.set_index('Team_Member'), use_container_width=True)
 
 # ============================ SIDEBAR ============================
-st.sidebar.image("https://logowik.com/content/uploads/images/servicenow5873.jpg", use_column_width=True)
+# --- FIX: Updated deprecated parameter ---
+st.sidebar.image("https://logowik.com/content/uploads/images/servicenow5873.jpg", use_container_width=True)
 st.sidebar.markdown("### Role Focus")
 st.sidebar.info(
     "This dashboard is for a **Senior Manager, Process Engineering & OpEx**, focused on leading a global team to drive ROI-based improvements and AI transformation within a cloud services organization."
